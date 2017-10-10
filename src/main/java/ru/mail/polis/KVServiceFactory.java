@@ -1,6 +1,8 @@
 package ru.mail.polis;
 
 import org.jetbrains.annotations.NotNull;
+import ru.mail.polis.kuryakin.FileDAO;
+import ru.mail.polis.kuryakin.Service;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +27,7 @@ final class KVServiceFactory {
      * @return a storage instance
      */
     @NotNull
-    static KVService create(
+    static Service create(
             final int port,
             @NotNull final File data) throws IOException {
         if (Runtime.getRuntime().maxMemory() > MAX_HEAP) {
@@ -44,7 +46,6 @@ final class KVServiceFactory {
             throw new IllegalArgumentException("Path is not a directory: " + data);
         }
 
-        // TODO: Implement me
-        throw new UnsupportedOperationException("Implement me!");
+        return new Service(port, new FileDAO(data.getPath()));
     }
 }

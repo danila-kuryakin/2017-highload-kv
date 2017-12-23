@@ -49,11 +49,12 @@ public final class Service implements KVService {
                     sendResponse(httpExchange, getValue, 200);
                     break;
                 case "PUT":
-                    final int contentLength = Integer.valueOf(httpExchange.getRequestHeaders().getFirst("Content-Length"));
-                    final byte[] putValue = new byte[contentLength];
-                    if (contentLength != 0 && httpExchange.getRequestBody().read(putValue) != putValue.length) {
-                        throw new IOException("Can't read at once");
+                    int contentLength = 0;
+                    if (httpExchange.getRequestHeaders().getFirst("Content-Length") != null) {
+                        contentLength = Integer.valueOf(httpExchange.getRequestHeaders().getFirst("Content-Length"));
                     }
+                    final byte[] putValue = new byte[contentLength];
+                    httpExchange.getRequestBody().read(putValue);
                     try {
                         dao.upsert(id, putValue);
                     } catch (IllegalArgumentException e) {

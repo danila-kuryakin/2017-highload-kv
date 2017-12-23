@@ -27,7 +27,7 @@ final class KVServiceFactory {
      * @return a storage instance
      */
     @NotNull
-    static Service create(
+    static KVService create(
             final int port,
             @NotNull final File data) throws IOException {
         if (Runtime.getRuntime().maxMemory() > MAX_HEAP) {

@@ -5,6 +5,7 @@ import com.sun.net.httpserver.HttpServer;
 import org.jetbrains.annotations.NotNull;
 import ru.mail.polis.KVService;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.NoSuchElementException;
@@ -49,15 +50,10 @@ public final class Service implements KVService {
                     sendResponse(httpExchange, getValue, 200);
                     break;
                 case "PUT":
-                    int contentLength = 0;
-                    if (httpExchange.getRequestHeaders().getFirst("Content-Length") != null) {
-                        contentLength = Integer.valueOf(httpExchange.getRequestHeaders().getFirst("Content-Length"));
-                    }
-                    final byte[] putValue = new byte[contentLength];
-                    httpExchange.getRequestBody().read(putValue);
                     try {
-                        dao.upsert(id, putValue);
-                    } catch (IllegalArgumentException e) {
+                        final byte[] putData = this.readData(httpExchange);
+                        dao.upsert(id, putData);
+                    } catch (IOException | IllegalArgumentException e) {
                         sendResponse(httpExchange, e.getMessage(), 400);
                         return;
                     }
@@ -76,6 +72,17 @@ public final class Service implements KVService {
                     sendResponse(httpExchange, method + "not allowed", 405);
             }
         });
+    }
+
+    private byte[] readData(HttpExchange http) throws IOException {
+        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[1024];
+            for (int len; (len = http.getRequestBody().read(buffer)) != -1; ) {
+                os.write(buffer, 0, len);
+            }
+            os.flush();
+            return os.toByteArray();
+        }
     }
 
     private void sendResponse(@NotNull HttpExchange http, @NotNull byte[] message, int code) throws IOException {

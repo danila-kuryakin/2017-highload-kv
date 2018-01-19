@@ -9,6 +9,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.NoSuchElementException;
+import java.util.concurrent.Executors;
 
 public final class Service implements KVService {
 
@@ -22,6 +23,7 @@ public final class Service implements KVService {
 
     public Service(int port, @NotNull DAO dao) throws IOException {
         this.httpServer = HttpServer.create(new InetSocketAddress(port), 0);
+        this.httpServer.setExecutor(Executors.newCachedThreadPool());
         this.dao = dao;
 
         this.httpServer.createContext("/v0/status", httpExchange -> sendResponse(httpExchange, "Server running", 200));
@@ -57,7 +59,7 @@ public final class Service implements KVService {
                         sendResponse(httpExchange, e.getMessage(), 400);
                         return;
                     }
-                    sendResponse(httpExchange, VALUE_BY_ID + id + "have been updated", 201);
+                    sendResponse(httpExchange, VALUE_BY_ID + id + "\nhave been updated", 201);
                     break;
                 case "DELETE":
                     try {

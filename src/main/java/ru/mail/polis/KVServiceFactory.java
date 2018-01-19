@@ -3,6 +3,7 @@ package ru.mail.polis;
 import org.jetbrains.annotations.NotNull;
 import ru.mail.polis.kuryakin.FileDAO;
 import ru.mail.polis.kuryakin.Service;
+import ru.mail.polis.kuryakin.OldService;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,5 +48,28 @@ final class KVServiceFactory {
         }
 
         return new Service(port, new FileDAO(data.getPath()));
+    }
+
+    @NotNull
+    static KVService createOld(
+            final int port,
+            @NotNull final File data) throws IOException {
+        if (Runtime.getRuntime().maxMemory() > MAX_HEAP) {
+            throw new IllegalStateException("The heap is too big. Consider setting Xmx.");
+        }
+
+        if (port <= 0 || 65536 <= port) {
+            throw new IllegalArgumentException("Port out of range");
+        }
+
+        if (!data.exists()) {
+            throw new IllegalArgumentException("Path doesn't exist: " + data);
+        }
+
+        if (!data.isDirectory()) {
+            throw new IllegalArgumentException("Path is not a directory: " + data);
+        }
+
+        return new OldService(port, new FileDAO(data.getPath()));
     }
 }

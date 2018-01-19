@@ -9,7 +9,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.NoSuchElementException;
-import java.util.concurrent.Executors;
+
 
 public final class OldService implements KVService {
 
@@ -23,7 +23,6 @@ public final class OldService implements KVService {
 
     public OldService (int port, @NotNull DAO dao) throws IOException {
         this.httpServer = HttpServer.create(new InetSocketAddress(port), 0);
-        this.httpServer.setExecutor(Executors.newCachedThreadPool());
         this.dao = dao;
 
         this.httpServer.createContext("/v0/status", httpExchange -> sendResponse(httpExchange, "Server running", 200));
